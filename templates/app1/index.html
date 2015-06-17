@@ -1,0 +1,73 @@
+<title>Subject Index</title>
+
+<head>
+	<link rel="icon" href="/static/images/icon.png"  type="image/jpg">
+	<style>
+		body {font-family: "Trebuchet MS", Helvetica, sans-serif;}
+		
+		.time_pos {
+				position: absolute;
+				top: 12px;
+				right: 5px;
+				size = 4;
+				color: #CC0000;
+				font-family: "Trebuchet MS", Helvetica, sans-serif;
+		}
+		
+		#user {position: absolute; top: 55px; right: 2px;};
+		
+	</style>
+	
+	<script>
+		function startTime() {
+			var today=new Date();
+			var h=today.getHours();
+			var m=today.getMinutes();
+			var s=today.getSeconds()
+			m = checkTime(m);
+			s = checkTime(s);
+			document.getElementById('time').innerHTML ="Current Time: " +h+":"+m+":"+s;
+			var t = setTimeout(function(){startTime()},500);
+		}
+
+		function checkTime(i) {
+			if (i<10) {i = "0" + i};  // add zero in front of numbers < 10
+			return i;
+		}
+	</script>
+	
+</head>
+
+<body bgcolor="white" onload="startTime()">
+
+<i1><img src='/static/images/biapTEL.png' border='0' width="190" height="80"></i1>
+
+<h1><font color = "#0099FF">Subject Index</font></h1>
+
+<p id="time" class = "time_pos"></p>
+
+<br><font size="4"><a href="/">Home</a></font><br />
+
+{% if user.is_authenticated %}
+	<div id="user">
+		Logged in as: {{ user.username }}<br>
+		<a href="/logout/">Logout</a><br />
+	</div>
+	
+	<!--Obtain list sent by view using template tags-->
+	{% if latest_patient_list %}
+		<ol>
+			{% for patient in latest_patient_list %}
+				<li><a href="/index/{{ patient.id }}/"><font color = "blue">{{ patient.identifier }}</font></a></li>
+			{% endfor %}
+		</ol>
+	{% else %}
+		<p><font color = "red">No patient data available.</font></p>
+	{% endif %}
+	
+<!--Warning message if user isn't logged in-->
+{% else %}
+	You need to be logged in to view patient data. Please <a href="/login/">login</a>.<br />
+{% endif %}
+
+</body>

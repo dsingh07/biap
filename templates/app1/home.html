@@ -1,0 +1,85 @@
+<html>
+<head>
+	<title>biap-TEL: Home</title>
+	<link rel="icon" href="/static/image/icon.png" type="image/png">
+	<script>
+		function startTime() {
+			var today=new Date(); 	// get today's date
+			var h=today.getHours();	// get time in hrs, mins, seconds
+			var m=today.getMinutes();
+			var s=today.getSeconds();
+			m = checkTime(m);
+			s = checkTime(s);
+			// return time to specified element
+			document.getElementById('txt').innerHTML = h+":"+m+":"+s;
+			var t = setTimeout(function(){startTime()},500);
+		}
+		// function returns a value between 01 and 60 for seconds and minutes
+		function checkTime(i) {
+			if (i<10) {i = "0" + i};  // add zero in front of numbers < 10
+			return i;
+		}
+	</script>
+	
+	<!--Positioning and sizing of elements using CSS-->
+	<style>
+		body {font-family: "Trebuchet MS", Helvetica, sans-serif;}
+		
+		#h3 {position: absolute; top: 0px; right: 0px;}
+		#user {position: absolute; top: 55px; right: 2px;}
+		#pic_home {position: absolute; top: 30%; left: 32%;}
+	</style>
+	
+</head>
+
+<body bgcolor="white" onload="startTime()">
+
+<!--Corner logos-->
+<div id="h2"><img src='/static/images/ic_logo.png' border='0' width="230" height="60"></div>
+<div id="h3"><img src='/static/images/wellcome.png' border='0' width="305" height="50"></div>
+
+<h1><font color = "#0099FF">Imperial BiAP Telemonitoring</font></h1>
+
+<!--Script to update page with current date-->
+<font color='cc3333' size="4">
+	<p align="right">
+		<script>		
+			// get current date, day, month, year and write it to document
+			var mydate=new Date()
+			var year=mydate.getYear()
+			if (year < 1000)
+			year+=1900
+			var day=mydate.getDay()
+			var month=mydate.getMonth()
+			var daym=mydate.getDate()
+			if (daym<10)
+			daym="0"+daym
+			var dayarray=new Array("Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday")
+			var montharray=new Array("January","February","March","April","May","June","July","August","September","October","November","December")
+			document.write("<medium><FONT color='cc3333' '<B>"+dayarray[day]+", "+montharray[month]+" "+daym+", "+year+"</B></FONT></SMALL>")
+		</script>
+	</p>
+	<p align="right" id="txt"></p>
+</font>
+
+<!--Check if user is logged in and display available links-->
+{% if user.is_authenticated %}
+	<div id ="user">
+		<br>Logged in as: {{ user.username }}<br />
+		<a href="/register/">Register new user</a><br />
+		<a href="/logout/">Logout</a><br />
+	</div>
+	<br><font size="5"><a href="/overview/">Overview</a></font>
+	<br><font size="5"><a href="/index/">Subject Index</a></font>
+	<br><font size="5"><a href="/admin/">Administration</a></font><br>
+{% else %}
+	<a href="/login/">Login</a><br />
+{% endif %}
+
+<!--Logo rendering-->
+<p id="pic_home" align="center">
+	<img src="/static/images/biapTEL.png" border="0" width="500" height="200">
+</p>
+	
+</body>
+</html>

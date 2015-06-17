@@ -1,0 +1,130 @@
+<head>
+	<title>Subject Data Log</title>
+	<link rel="icon" href="/static/images/icon.png" type="image/jpg">
+	
+	<meta charset="utf-8">
+	<script type="text/javascript" src="/static/javascript/jquery.min.js"></script>
+	<script type="text/javascript" src="/static/javascript/configuration.js"></script>
+	
+	<style>
+		body {font-family: "Trebuchet MS", Helvetica, sans-serif;}
+		
+		#user {position: absolute; top: 55px; right: 2px;};
+		
+		.time_pos {
+				position: absolute;
+				top: 32px;
+				right: 5px;
+				size = 4;
+				color: #CC0000;
+		}
+	</style>
+	
+	<script>
+		function startTime() {
+			var today=new Date();
+			var h=today.getHours();
+			var m=today.getMinutes();
+			var s=today.getSeconds();
+			m = checkTime(m);
+			s = checkTime(s);
+			document.getElementById('time').innerHTML = "Current time: "+h+":"+m+":"+s;
+			var t = setTimeout(function(){startTime()},500);
+		}
+
+		function checkTime(i) {
+			if (i<10) {i = "0" + i};  // add zero in front of numbers < 10
+			return i;
+		}
+	</script>
+	
+</head>
+
+<body bgcolor="white" onload="startTime()">
+
+<i1><img src='/static/images/biapTEL.png' border='0' width="190" height="80"></i1>
+<p id="time" class = "time_pos"></p>
+
+<h1 id="heading1"><font color = "#0099FF">Subject Data Log</font></h1>
+
+<h2 id="heading2"><font size="4"><a href="/">Home</a></font></br></h2>
+
+{% if user.is_authenticated %}
+
+	<div id="user">
+		Logged in as: {{ user.username }}<br>
+		<a href="/logout/">Logout</a><br />
+	</div>
+	
+	<!--Division containing all the data in text-->
+	<div id="data"></div>
+	
+{% else %}
+	You need to be logged in to view patient data. Please <a href="/login/">login</a>.<br />
+{% endif %}
+
+<script>
+	// autorefresh every 45 seconds
+	setTimeout(function(){
+		window.location.reload(1);
+	}, global_variables.timeout);
+	
+	// When it is ready call init.
+	$(this).ready(init);
+	
+	function init() { 
+		populatePatientData();
+	}
+	
+	var host = "{{server}}";
+	
+	function populatePatientData() {
+		// Fill the patients from database.
+		
+			// GET PATIENT DATA
+			$.getJSON('http://'+ host + '/index/' + {{patient.id}} +'/patient_data/', function (data){
+					
+					html = "<div>";
+					html += "content";
+					html += "</div>";
+
+					var latest_instance = data.length - 1;
+					
+					$("#data").append("<br><font size='4'><a href='/index/{{patient.id}}/'>Detailed View</a></font></br>");
+					
+					// Constant patient parameters
+					$("#data").append("<font size='4'><b>Subject Identifier: {{patient.identifier}}, </b></font>");
+					$("#data").append("<font size='4'><b>Insulin-to-carbs Ratio: {{patient.icr}} U/g, </b></font>");
+					$("#data").append("<font size='4'><b>Correction Factor: {{patient.cf}} mmol/L/units, </b></font>");
+					$("#data").append("<font size='4'><b>Total Daily Insulin: {{patient.tdi}} U, </b></font>");
+					$("#data").append("<font size='4'><b>Age: {{patient.age}} years, </b></font>");
+					$("#data").append("<font size='4'><b>Weight: {{patient.weight}} Kg</b></font><br><br>");
+					
+					$("#data").append("<font size='4'><b>Important Notes:</b></font><br>");
+					$("#data").append("<font size='4'>1. Safety Parameter (1: Very low, 2: Low, 3: Normal, 4: High, 5: Very High)</font><br>");
+					$("#data").append("<font size='4'>2. Calibration Flag: Sensor calibrated by user or not</font><br><br>");
+					
+					// create a list display of each parameter in data set and output each data set like this in reverse time order
+					for (var k = (data.length-1); k >= 0; k--){
+						$("#data").append("<b>" + (k+1) + ".<br></b>");
+						$("#data").append("Time of sample: " + data[k].time + "<br>");
+						$("#data").append("Date of sample: " + data[k].date + "<br>");
+						$("#data").append("CGM Measurement: " + data[k].cgm_value + " mmol/L<br>");
+						//$("#data").append("Blood glucose (YSI/Glucosometer) : " + data[k].blood_glucose + " mmol/l<br>");
+						$("#data").append("Insulin Infusion from pump: " + data[k].insulin_infusion + " U<br>");
+						$("#data").append("Secreted Insulin: " + data[k].sr + " U<br>");
+						$("#data").append("Insulin Feed: " + data[k].insulin_feed + " U<br>");
+						//$("#data").append("Meal (ingested carbohydrates) : " + data[k].carbohydrates + " grams<br>");
+						$("#data").append("Safety Parameter: " + data[k].safety + "<br>");
+						$("#data").append("Calibration Flag: " + data[k].calibration + "<br>");
+						//$("#data").append("Glucose Derivative: " + data[k].glucose_derivative + "<br>");
+						//$("#data").append("Sensor Saturation: " + data[k].sensor_saturation + "<br>");
+						$("#data").append("Controller Gain: " + data[k].controller_gain + "<br>");
+						$("#data").append("Basal Insulin: " + data[k].basal_insulin + " U<br>");
+					} 
+			});
+					
+			}
+</script>   
+
+</body>

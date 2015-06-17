@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+		<link rel="icon" href="/static/images/icon.png" type="image/png">
+        <title>Imperial BiAP Monitoring</title>
+		
+		<style>
+			body {font-family: "Trebuchet MS", Helvetica, sans-serif;}
+		</style>
+		
+    </head>
+
+    <body>
+        <i1><img src='/static/images/biapTel.png' border='0' width="190" height="80"></i1>
+		<h1>Login</h1>
+		
+		<!--Form input for login details-->
+        <form id="login_form" method="post" action="/login/">
+            {% csrf_token %}
+            Username: <input type="text" name="username" value="" size="50" />
+            <br />
+            Password: <input type="password" name="password" value="" size="50" />
+            <br />
+
+            <input type="submit" value="Submit" />
+        </form>
+
+    </body>
+</html>

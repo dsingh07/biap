@@ -1,0 +1,165 @@
+================
+Response objects
+================
+
+.. module:: django_extras.http
+   :synopsis: Additional classes for common responses.
+
+HttpResponse subclasses
+=======================
+
+Django extras includes a number of additional ``HttpResponse`` subclasses
+that handle different types of HTTP responses. These subclasses are defined in
+:mod:`django_extras.http`.
+
+
+Common HTTP response types
+--------------------------
+
+Common response codes, most of these codes are defined in the
+`W3C Protocol specification`_. This collection also includes status codes that
+are defined for Web DAV. This list does not include response types that are
+already defined in Django.
+
+.. _W3C Protocol specification: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
+
+
+Successful 2xx responses
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. class:: HttpResponseCreated
+
+    Status code 201
+
+.. class:: HttpResponseAccepted
+
+    Status code 202
+
+.. class:: HttpResponseNonAuthoritative
+
+    Status code 203
+
+.. class:: HttpResponseNoContent
+
+    Status code 204
+
+.. class:: HttpResponseResetContent
+
+    Status code 205
+
+.. class:: HttpResponsePartialContent
+
+    Status code 206
+
+
+Redirection 3xx responses
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+All responses within the 3xx class inherit from :class:`HttpResponseRedirect`.
+
+.. class:: HttpResponseSeeOther
+
+    Status code 303
+
+
+Client Error 4xx responses
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. class:: HttpResponseUnAuthorised
+
+    Status code 401
+
+.. class:: HttpResponsePaymentRequired
+
+    Status code 402
+
+.. class:: HttpResponseNotAcceptable
+
+    Status code 406
+
+.. class:: HttpResponseRequestTimeout
+
+    Status code 408
+
+.. class:: HttpResponseConflict
+
+    Status code 409
+
+.. class:: HttpResponseLengthRequired
+
+    Status code 411
+
+.. class:: HttpResponsePreconditionFailed
+
+    Status code 412
+
+.. class:: HttpResponseRequestEntityTooLarge
+
+    Status code 413
+
+.. class:: HttpResponseUnsupportedMediaType
+
+    Status code 415
+
+.. class:: HttpResponseExpectationFailed
+
+    Status code 417
+
+.. class:: HttpResponseUnprocessableEntity
+
+    Status code 422
+
+.. class:: HttpResponseLocked
+
+    Status code 423
+
+.. class:: HttpResponseFailedDependency
+
+    Status code 424
+
+.. class:: HttpResponseUpgradeRequired
+
+    Status code 426
+
+
+Server Error 5xx responses
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. class:: HttpResponseNotImplemented
+
+    Status code 501
+
+.. class:: HttpResponseBadGateway
+
+    Status code 502
+
+.. class:: HttpResponseServiceUnavailable
+
+    Status code 503
+
+.. class:: HttpResponseGatewayTimeout
+
+    Status code 504
+
+.. class:: HttpResponseInsufficientStorage
+
+    status_code = 507
+
+
+Enhanced response types
+-----------------------
+
+.. class:: FileResponse
+
+    The constructor accepts the same ``content`` property as the default
+    :class:``HttpResponse`` class except it is interpreted as a file name or
+    file handle and ``content_type``. The response object facilitates streaming
+    the content of the file to the client. There is an optional parameter
+    ``include_last_modified`` which defaults to *True* that supplies the
+    last modified date of the specified file as an HTTP header.
+
+.. class:: JsonResponse
+
+    Acts just like :class:``HttpResponse`` except will encode the first
+    parameter to JSON (using :class:``DjangoJSONEncoder``) and changes the
+    default ``content_type`` to *application/json*.

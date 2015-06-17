@@ -1,0 +1,16 @@
+.. _contents:
+
+====================================
+Django Extras documentation contents
+====================================
+
+.. toctree::
+    :hidden:
+
+    index
+
+.. toctree::
+    :maxdepth: 3
+
+    ref/index
+    topics/auth

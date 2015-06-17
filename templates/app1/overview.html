@@ -1,0 +1,282 @@
+<!DOCTYPE html >
+<html>
+<head>
+	<meta charset="utf-8">
+	<!--Import charts in static directory-->
+	<script type="text/javascript" src="/static/javascript/jquery.min.js"></script>
+	<script type="text/javascript" src="/static/javascript/configuration.js"></script>
+	<script type="text/javascript" src="/static/javascript/jquery.js"></script>
+	<script type="text/javascript" src="/static/javascript/jquery-min.js"></script>
+	<script type="text/javascript" src="/static/javascript/jquery-jqplot-min.js"></script>
+	<script type="text/javascript" src="/static/javascript/jqplot-metergaugerenderer-min.js"></script>
+	<link rel="stylesheet" type="text/css" href="/static/css/jquery-jqplot-min.css" />
+	
+	<title>Subject Overview</title>
+	<link rel="icon" href="/static/images/icon.png" type="image/jpg">
+	
+	<script>
+		function startTime() {
+			var today=new Date();
+			var h=today.getHours();
+			var m=today.getMinutes();
+			var s=today.getSeconds();
+			m = checkTime(m);
+			s = checkTime(s);
+			document.getElementById('time').innerHTML ="Current Time: " +h+":"+m+":"+s;
+			var t = setTimeout(function(){startTime()},500);
+		}
+
+		function checkTime(i) {
+			if (i<10) {i = "0" + i};  // add zero in front of numbers < 10
+			return i;
+		}
+	</script>
+	
+	<script>	
+					// autorefresh every 45 seconds
+					setTimeout(function(){
+						window.location.reload(1);
+					}, global_variables.timeout);
+					
+					// variable sent by view containing host and ip
+					var host = "{{server}}";
+					
+					function populatePatientData(patient_id) {
+						
+						// Fill the patients from database.
+						
+							// GET PATIENT DATA
+							$.getJSON('http://'+ host + '/index/' + patient_id +'/patient_data/', function (data){
+								// Here you have all the data in the browser
+									
+									if (data.length==0) {
+										return;
+									}
+									
+									html = "<div>";
+									html += "content";
+									html += "</div>";
+
+									console.log(data);
+									//console.log(data.length);
+									var latest_instance = data.length - 1;
+									
+									
+									dG = data[latest_instance].glucose_derivative;
+									
+									// render gauge for current cgm value
+									$(document).ready(function(){
+									   s1 = [data[latest_instance].cgm_value];
+									 
+									   plot3 = $.jqplot('light_'+patient_id,[s1],{
+										   seriesDefaults: {
+											   renderer: $.jqplot.MeterGaugeRenderer,
+											   rendererOptions: {
+												   label: 'Current CGM Value (mmol/l)',
+												   labelPosition: 'bottom',
+												   labelHeightAdjust: -5,
+												   max: global_variables.gauge_max,
+												   intervals:[global_variables.min_glucose, global_variables.gauge_yellow1_end, global_variables.gauge_yellow2_start, global_variables.max_glucose, global_variables.gauge_max],
+												   intervalColors:['#FF0000', '#E7E658', '#33CC33', '#E7E658', '#FF0000']
+											   }
+										   }
+									   });
+									});
+									
+									// Calculate future glucose value based on derivative			
+									var time_window = global_variables.window_length;
+									predicted_glucose = Number((data[latest_instance].cgm_value + (dG*time_window)).toFixed(4));
+									
+									// Get current time and subtract it from latest data instance unless only one instance of data exists
+									if (data.length != 1) {
+										var time_last = new Date(data[latest_instance-1].date.replace(/-/g,'/') + " " + data[latest_instance-1].time);
+										console.log(time_last);
+										var time_diff = Number(((Math.abs(new Date() - time_last))/60000).toFixed(2));
+										console.log(time_diff);
+									} else {
+										var time_last = new Date(data[latest_instance].date.replace(/-/g,'/') + " " + data[latest_instance].time);
+										console.log(time_last);
+										var time_diff = Number(((Math.abs(new Date() - time_last))/60000).toFixed(2));
+										console.log(time_diff);
+									}
+						
+									//Check connection
+									if (time_diff > global_variables.data_delay) {
+										$("#bt_"+patient_id).append("<b><font color='red'>No data since " + time_diff + " minutes, possible connection loss.</font></b>");
+									}
+									
+									$("#bt_"+patient_id).append("<br>Current CGM Value: " + data[latest_instance].cgm_value + " mmol/L<br>");
+									
+									// Display alert images in case of adverse events
+									if (data[latest_instance].cgm_value >= global_variables.max_glucose) {
+										$("#arrow_"+patient_id).append("<img id='alarm2' align='right' src='/static/images/present_hyper.png' border='1' width='120' height='110'>");
+									} else if (data[latest_instance].cgm_value <= global_variables.min_glucose) {
+										$("#arrow_"+patient_id).append("<img id='alarm3' align='right' src='/static/images/present_hypo.png' border='1' width='120' height='110'>");
+									} else if (predicted_glucose <= global_variables.min_glucose) {
+										$("#arrow_"+patient_id).append("<img id='alarm4' align='right' src='/static/images/future_hypo.png' border='1' width='120' height='110'>");
+									} else if (predicted_glucose >= global_variables.max_glucose) {
+										$("#arrow_"+patient_id).append("<img id='alarm5' align='right' src='/static/images/future_hyper.png' border='1' width='120' height='110'>");
+									}
+									
+									// Check glucose trend
+									if (dG < -0.11) {
+										$("#arrow_"+patient_id).append("<img src='/static/images/down.png' width='80' height='80' border='1'>");
+										$("#arrow_"+patient_id).append("<br>Rapidly decreasing</br>");
+									} else if (dG >= -0.11 && dG < -0.06) {
+										$("#arrow_"+patient_id).append("<img src='/static/images/down_mild.png' width='80' height='80' border='1'>");
+										$("#arrow_"+patient_id).append("<br>Slowly decreasing</br>");
+									} else if (dG >= -0.06 && dG <= 0.06) {
+										$("#arrow_"+patient_id).append("<img src='/static/images/normal.png' width='80' height='80' border='1'>");
+										$("#arrow_"+patient_id).append("<br>Stable</br>");
+									} else if (dG > 0.06 && dG <= 0.11) {
+										$("#arrow_"+patient_id).append("<img src='/static/images/up_mild.png' width='80' height='80' border='1'>");
+										$("#arrow_"+patient_id).append("<br>Slowly increasing</br>");
+									} else if(dG > 0.11) {
+										$("#arrow_"+patient_id).append("<img src='/static/images/up.png' width='80' height='80' border='1'>");
+										$("#arrow_"+patient_id).append("<br>Rapidly increasing</br>");
+									}
+															
+								});
+							
+						}
+
+				</script>   
+	
+	<style type="text/css">
+		body{ background-color: white;} 
+		
+		.time_pos {
+				position: absolute;
+				top: 5px;
+				right: 5px;
+				size = 4;
+				color: #CC0000;
+				font-family: "Trebuchet MS", Helvetica, sans-serif;
+		}
+		
+		#heading, #patient_box {font-family: "Trebuchet MS", Helvetica, sans-serif;}
+		
+		/* relative positioning of objects within box division */
+		.b1 {position: relative;}
+		.a1 {position: relative;}
+		.a2 {position: relative;}
+		.l1 {position: relative; width: 100%; height: 166px;}
+		
+		#user {position: absolute; top: 55px; right: 2px;}
+		
+		/* Class for box divisions */
+		.b {
+			display: inline-block;
+			position: relative;
+			margin: 1%;
+			border: black;
+			float: left;
+			width: 260px;
+			height: 100%;
+			background-color: #8ECCC0;
+		}
+		
+		/* Animation for flashing images: */
+		@-webkit-keyframes blink {
+			0% {
+				opacity: 1;
+			}
+			50% {
+				opacity: 0;
+			}
+			100% {
+				opacity: 1;
+			}
+		}
+		@-moz-keyframes blink {
+			0% {
+				opacity: 1;
+			}
+			50% {
+				opacity: 0;
+			}
+			100% {
+				opacity: 1;
+			}
+		}
+		@-o-keyframes blink {
+			0% {
+				opacity: 1;
+			}
+			50% {
+				opacity: 0;
+			}
+			100% {
+				opacity: 1;
+			}
+		}
+		#alarm2, #alarm3, #alarm4, #alarm5
+		{
+			-webkit-animation: blink 1s;
+			-webkit-animation-iteration-count: infinite;
+			-moz-animation: blink 1s;
+			-moz-animation-iteration-count: infinite;
+			-o-animation: blink 1s;
+			-o-animation-iteration-count: infinite;
+		}
+
+		
+	</style>
+</head>
+
+<body onload="startTime()">
+
+<h1><img src='/static/images/biapTEL.png' border='0' width="190" height="80"></h1>
+
+<p id="time" class = "time_pos"></p>
+
+<div id="heading">
+	<h1><font color = "#0099FF">Subject Overview</font></h1>
+
+	<font size="5"><a href="/">Home</a></font>
+</div>
+
+{% if user.is_authenticated %}
+	<div id="user">
+		Logged in as: {{ user.username }}
+		<br><a href="/logout/">Logout</a></h3>
+	</div>
+	
+	{% if latest_patient_list %}
+	   <ol>
+		{% for patient in latest_patient_list %}
+			<!--Create a box division for each patient in list-->
+			<div id="patient_box_{{patient.id}}" class="b">
+				<font size="3">
+					<a href="/index/{{ patient.id }}/">{{ patient.identifier }}</a>
+					<br>Age: {{ patient.age }}</br>
+					<div class = "b1" id = "bt_{{patient.id}}"></div>
+					<div class = "a1" id = "arrow_{{patient.id}}"></div>
+					<div class = "a2" id = "alert_{{patient.id}}"></div>
+					<div class = "l1" id = "light_{{patient.id}}"></div>
+					<script>
+						var id_pat = {{patient.id}};
+						populatePatientData(id_pat);
+					</script>
+				</font>
+			</div>			
+		{% endfor %}
+		</ol>
+
+	{% else %}
+		<p><font color = "red">No patient data available.</font></p>
+	{% endif %}
+
+	<div class="b"></div>
+	<div class="b"></div>
+	<div class="b"></div>
+
+	
+{% else %}
+	<br>You need to be logged in to view patient data. Please <a href="/login/">login</a>.<br />
+{% endif %}
+
+
+</body>
+
+</html>

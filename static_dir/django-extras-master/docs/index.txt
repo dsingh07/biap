@@ -1,0 +1,56 @@
+.. _index:
+
+===========================
+Django Extras documentation
+===========================
+
+Project Status
+==============
+
+This is a fairly new project, while this package is utilised in production on
+several projects the status will remain as beta until unit-test coverage has
+been expanded. Documentation is now fairly complete, in general areas of the
+code base that have not been documented should be considered unstable.
+
+Getting help
+============
+
+* Report bugs with Django Extras with the `issue tracker`_.
+
+.. _issue tracker: https://bitbucket.org/timsavage/django-extras/issues
+
+What's in Django Extras
+=======================
+
+Django Extras is a project that provides extensions for Django_ to solve common
+development situations not (or not yet) covered by the core Django framework.
+
+Examples of this include:
+
+* additional decorators
+* model mixins to easily assign owners to a model
+* additional model and form fields
+* greatly expanded collection of default response classes
+
+See :doc:`ref/index` full reference.
+
+First steps
+===========
+
+If you are new to Django it is recommended you visit the `Django documentation`_
+as they have excellent documentation to get you up and running.
+
+.. _Django: https://www.djangoproject.com/
+.. _Django documentation: https://docs.djangoproject.com/
+
+Other batteries included
+========================
+
+* :doc:`Authentication <topics/auth>`
+
+Source code
+===========
+
+Full `source code`_ is available on Git Hub. Have migrated away from BitBucket for Travis CI support.
+
+.. _source code: https://github.com/timsavage/django-extras

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>BiAP Registration</title>
+		<link rel="icon" href="/static/images/icon.png" type="image/png">
+		
+		<style>
+			body {font-family: "Trebuchet MS", Helvetica, sans-serif;}
+			
+			#user {position: absolute; top: 5px; right: 2px;}
+		</style>
+		
+    </head>
+
+    <body>
+		<i1><img src='/static/images/biapTEL.png' border='0' width="190" height="80"></i1>
+        
+		{% if user.is_authenticated %}
+			
+			
+			<div id ="user">
+				Logged in as: {{ user.username }}
+			</div>
+			
+			<!--Check if user is already registered-->
+			{% if registered %}
+				<strong>Thank you for registering.</strong>
+				<a href="/">Return to the homepage.</a><br />
+			{% else %}
+				<strong><br><br>Register new user here</strong><br />
+
+				<form id="user_form" method="post" action="/register/"
+						enctype="multipart/form-data">
+
+					{% csrf_token %}
+
+					<!-- Display each form. The as_p method wraps each element in a paragraph
+						 (<p>) element. This ensures each element appears on a new line,
+						 making everything look neater. -->
+					{{ user_form.as_p }}
+
+					<!-- Provide a button to click to submit the form. -->
+					<input type="submit" name="submit" value="Register" />
+				</form>			
+			{% endif %}
+		
+		{% else %}
+			You need to be an existing user to register further users. Please click <a href="/login/">here</a> to login.<br />
+		{% endif %}
+
+        
+    </body>
+</html>

@@ -1,0 +1,5 @@
+[run]
+source = django_extras
+
+[report]
+omit = */tests/*
